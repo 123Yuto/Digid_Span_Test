@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digit Span Test - Backward Recall</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Digit Span Test - Backward Recall</h1>
+    <p>Memorize the sequence of digits below and enter them in reverse order:</p>
+    <div id="digitSequence"></div>
+    <button onclick="startTest()">Start Test</button>
+    <div id="userInput" style="display: none;">
+      <p>Enter the digits in reverse order:</p>
+      <input type="text" id="userSequence">
+      <button onclick="evaluateSequence()">Submit</button>
+    </div>
+    <div id="result" style="display: none;">
+      <h2>Your Score:</h2>
+      <p id="score"></p>
+    </div>
+  </div>
+
+  <script>
+    const digitSequenceElement = document.getElementById('digitSequence');
+    const userInputElement = document.getElementById('userInput');
+    const userSequenceInput = document.getElementById('userSequence');
+    const resultElement = document.getElementById('result');
+    const scoreElement = document.getElementById('score');
+    const startButton = document.querySelector('button');
+
+    let digitSequences = [];
+    let currentIndex = 0;
+    let totalScore = 0;
+
+    function startTest() {
+      startButton.style.display = 'none';
+      digitSequences = generateDigitSequences([5, 5, 6, 6, 7, 7, 8, 9, 10, 11]);
+      totalScore = 0;
+      currentIndex = 0;
+      displayNextDigit();
+    }
+
+    function displayNextDigit() {
+      if (currentIndex < digitSequences.length) {
+        const sequence = digitSequences[currentIndex];
+        let index = 0;
+        const interval = setInterval(() => {
+          digitSequenceElement.textContent = sequence[index];
+          index++;
+          if (index >= sequence.length) {
+            clearInterval(interval);
+            setTimeout(() => {
+              digitSequenceElement.textContent = '';
+              userInputElement.style.display = 'block';
+            }, 1000); // Wait 1 second after displaying the entire sequence
+          }
+        }, 1000); // Display each digit for 1 second
+      } else {
+        showScore();
+      }
+    }
+
+    function evaluateSequence() {
+      const userSequence = userSequenceInput.value.trim();
+      const correctSequence = digitSequences[currentIndex].split('').reverse().join('').replace(/\s/g, '');
+
+      if (userSequence === correctSequence) {
+        totalScore++;
+      }
+
+      userSequenceInput.value = '';
+      userInputElement.style.display = 'none';
+      resultElement.style.display = 'none';
+      currentIndex++;
+      displayNextDigit();
+    }
+
+    function showScore() {
+      scoreElement.textContent = `Your Total Score: ${totalScore} / 10`;
+      resultElement.style.display = 'block';
+    }
+
+    function generateDigitSequences(lengths) {
+      const sequences = [];
+      lengths.forEach(length => {
+        let sequence = '';
+        for (let i = 0; i < length; i++) {
+          sequence += Math.floor(Math.random() * 10);
+          sequence += ' ';
+        }
+        sequences.push(sequence.trim());
+      });
+      return sequences;
+    }
+  </script>
+</body>
+</html>
