@@ -9,8 +9,11 @@
 <body>
   <div class="container">
     <h1>Digit Span Test - Backward Recall</h1>
-    <p>This test consists of a total of 10 questions. Memorize the sequence of digits below and enter them in reverse order:</p>
+    <p>This test consists of a total of 10 questions.</p>
+    <div id="questionNumber"></div>
+    <p>Memorize the sequence of digits below and enter them in reverse order:</p>
     <div id="digitSequence"></div>
+    <div id="timer"></div>
     <button onclick="startTest()">Start Test</button>
     <div id="userInput" style="display: none;">
       <p><strong>Enter the digits in reverse order:</strong></p>
@@ -25,6 +28,8 @@
 
   <script>
     const digitSequenceElement = document.getElementById('digitSequence');
+    const questionNumberElement = document.getElementById('questionNumber');
+    const timerElement = document.getElementById('timer');
     const userInputElement = document.getElementById('userInput');
     const userSequenceInput = document.getElementById('userSequence');
     const resultElement = document.getElementById('result');
@@ -34,10 +39,11 @@
     let digitSequences = [];
     let currentIndex = 0;
     let totalScore = 0;
+    let timer;
 
     function startTest() {
       startButton.style.display = 'none';
-      digitSequences = generateDigitSequences([5, 5, 6, 6, 7, 7, 8, 9, 10, 11]);
+      digitSequences = generateDigitSequences([5,5,6,6,7,7,8,9,10,11]);
       totalScore = 0;
       currentIndex = 0;
       displayNextDigit();
@@ -47,6 +53,7 @@
       if (currentIndex < digitSequences.length) {
         const sequence = digitSequences[currentIndex];
         let index = 0;
+        questionNumberElement.textContent = `Question ${currentIndex + 1}:`;
         const interval = setInterval(() => {
           digitSequenceElement.textContent = sequence[index];
           index++;
@@ -55,15 +62,36 @@
             setTimeout(() => {
               digitSequenceElement.textContent = '';
               userInputElement.style.display = 'block';
-            }, 700); // Wait 1 second after displaying the entire sequence
+              startTimer(); // Start the timer for user input
+            }, 800); // Wait 0.8 seconds after displaying the entire sequence
           }
-        }, 700); // Display each digit for 1 second
+        }, 800); // Display each digit for 0.8 seconds
       } else {
         showScore();
       }
     }
 
+    function startTimer() {
+      let timeLeft = digitSequences[currentIndex].length * 800;
+      updateTimerDisplay(timeLeft);
+      timer = setInterval(() => {
+        timeLeft -= 1000;
+        if (timeLeft < 0) {
+          clearInterval(timer);
+          evaluateSequence();
+        } else {
+          updateTimerDisplay(timeLeft);
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay(timeLeft) {
+      const seconds = Math.ceil(timeLeft / 1000);
+      timerElement.textContent = `Time Left: ${seconds} seconds`;
+    }
+
     function evaluateSequence() {
+      clearInterval(timer); // Clear the timer
       const userSequence = userSequenceInput.value.trim();
       const correctSequence = digitSequences[currentIndex].split('').reverse().join('').replace(/\s/g, '');
 
